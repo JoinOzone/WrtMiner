@@ -26,7 +26,7 @@ define Package/wrtminer
 	SECTION:=utils
 	CATEGORY:=Utilities
 	TITLE:=WrtMiner - mines cryptocurrency on your router
-	DEPENDS:=+libcurl +openssl
+	DEPENDS:=+libcurl +libopenssl +zlib +libstdcpp
 	MAINTAINER:=Alex Atallah <alex.atallah@joinozone.com>
 	URL:=https://joinozone.com
 endef
@@ -56,10 +56,10 @@ CONFIGURE_ARGS += \
 # In order to just build a simple program that we have just written, it is
 # much easier to do it this way.
 define Build/Prepare
-	# $(Build/Prepare/Default)
 	mkdir -p $(PKG_BUILD_DIR)
 	$(CP) ./cpuminer-multi-tpruvot/* $(PKG_BUILD_DIR)/
-	$(PKG_BUILD_DIR)/autogen.sh
+	( cd $(PKG_BUILD_DIR); ./autogen.sh )
+	# $(call Build/Configure/Default)
 endef
 
 
@@ -98,7 +98,7 @@ endef
 # directory) to the install directory.
 define Package/wrtminer/install
 	$(INSTALL_DIR) $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/wrtminer $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/cpuminer $(1)/usr/bin
 
 	$(INSTALL_DIR) $(1)/etc/init.d/
 	$(INSTALL_BIN) files/wrtminer.init $(1)/etc/init.d/wrtminer

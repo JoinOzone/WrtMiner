@@ -4,7 +4,7 @@ START=95
 
 LIST_SEP="
 "
-EXAMPLE_COMMAND=/usr/bin/wrtminer -a cryptonight
+COMMAND="/usr/bin/cpuminer -a cryptonight"
 
 
 section_enabled() {
@@ -22,12 +22,12 @@ start_instance() {
 
 	[ $enabled -gt 0 ] || return 1
 
-	eval service_start "$EXAMPLE_COMMAND -u $wallet -o $pool:$port -p $username:$password"
+	eval service_start "$COMMAND -u $wallet -o $pool:$port -p $username:$password"
 }
 
 stop_instance() {
 	local s="$1"
-	service_stop "$EXAMPLE_COMMAND"
+	service_stop "$COMMAND"
 }
 
 start() {
