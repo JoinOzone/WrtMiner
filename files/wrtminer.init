@@ -1,0 +1,41 @@
+#!/bin/sh /etc/rc.common
+
+START=95
+
+LIST_SEP="
+"
+EXAMPLE_COMMAND=/usr/bin/wrtminer -a cryptonight
+
+
+section_enabled() {
+	config_get_bool enabled "$1" 'enabled' 0
+	[ $enabled -gt 0 ]
+}
+
+start_instance() {
+	local s="$1"
+	local wallet
+	local enabled
+
+	config_get_bool enabled "$1" 'enabled' 0
+	config_get wallet "$1" 'wallet' 0
+
+	[ $enabled -gt 0 ] || return 1
+
+	eval service_start "$EXAMPLE_COMMAND -u $wallet -o $pool:$port -p $username:$password"
+}
+
+stop_instance() {
+	local s="$1"
+	service_stop "$EXAMPLE_COMMAND"
+}
+
+start() {
+	config_load 'wrtminer'
+	config_foreach start_instance 'wrtminer'
+}
+
+stop() {
+	config_load 'wrtminer'
+	config_foreach stop_instance 'wrtminer'
+}

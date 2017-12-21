@@ -1,25 +1,11 @@
 ##############################################
-# OpenWrt Makefile
-#
-#
-# Most of the variables used here are defined in
-# the include directives below. We just need to 
-# specify a basic description of the package, 
-# where to build our program, where to find 
-# the source files, and where to install the 
-# compiled program on the router. 
-# 
-# Be very careful of spacing in this file.
-# Indents should be tabs, not spaces, and 
-# there should be no trailing whitespace in
-# lines that are not commented.
-# 
+# OpenWrt Makefile for wrtminer
 ##############################################
 
 include $(TOPDIR)/rules.mk
 
 # Name and release number of this package
-PKG_NAME:=cpuminer
+PKG_NAME:=wrtminer
 PKG_VERSION:=1.0.0
 PKG_RELEASE:=1
 
@@ -27,8 +13,8 @@ PKG_RELEASE:=1
 # This specifies the directory where we're going to build the program.  
 # The root build directory, $(BUILD_DIR), is by default the build_mipsel 
 # directory in your OpenWrt SDK directory
-PKG_SOURCE:=cpuminer-$(PKG_VERSION).tar.xz
-PKG_BUILD_DIR := $(BUILD_DIR)/cpuminer-$(PKG_VERSION)
+PKG_SOURCE:=wrtminer-$(PKG_VERSION).tar.xz
+PKG_BUILD_DIR := $(BUILD_DIR)/$(PKG_NAME)
 
 
 include $(INCLUDE_DIR)/package.mk
@@ -36,17 +22,18 @@ include $(INCLUDE_DIR)/package.mk
 
 # Specify package information for this program. 
 # The variables defined here should be self explanatory.
-define Package/cpuminer
+define Package/wrtminer
 	SECTION:=utils
 	CATEGORY:=Utilities
-	TITLE:=cpuminer -- mines cryptocurrency on your router
+	TITLE:=WrtMiner - mines cryptocurrency on your router
 	DEPENDS:=+libcurl +openssl
 	MAINTAINER:=Alex Atallah <alex.atallah@joinozone.com>
+	URL:=https://joinozone.com
 endef
 
 
-define Package/cpuminer/description
-	Mine cryptocurrency on your router's off-time. See joinozone.com
+define Package/wrtminer/description
+	Mine cryptocurrency when your router is idle. See joinozone.com
 endef
 
 define Build/Configure
@@ -55,12 +42,12 @@ endef
 
 
 CONFIGURE_ARGS += \
-	CFLAGS="-march=armv7 -mfpu=neon" \
+	CFLAGS="-mfpu=neon" \
 	--with-curl \
 	--with-crypto
 
-CONFIGURE_VARS += \
-	CC="$(TOOLCHAIN_DIR)/bin/$(TARGET_CC)"
+# CONFIGURE_VARS += \
+# 	CC="$(TOOLCHAIN_DIR)/bin/$(TARGET_CC)"
 
 # Specify what needs to be done to prepare for building the package.
 # In our case, we need to copy the source files to the build directory.
@@ -70,10 +57,9 @@ CONFIGURE_VARS += \
 # much easier to do it this way.
 define Build/Prepare
 	# $(Build/Prepare/Default)
-	# echo '#!/bin/sh' > $(PKG_BUILD_DIR)/update-usbids.sh.in
-	# echo 'cp $(DL_DIR)/$(USB_IDS_FILE) usb.ids.gz' >> $(PKG_BUILD_DIR)/update-usbids.sh.in
 	mkdir -p $(PKG_BUILD_DIR)
 	$(CP) ./cpuminer-multi-tpruvot/* $(PKG_BUILD_DIR)/
+	$(PKG_BUILD_DIR)/autogen.sh
 endef
 
 
@@ -104,15 +90,20 @@ endef
 
 
 # Specify where and how to install the program. Since we only have one file, 
-# the cpuminer executable, install it by copying it to the /bin directory on
+# the wrtminer executable, install it by copying it to the /bin directory on
 # the router. The $(1) variable represents the root directory on the router running 
 # OpenWrt. The $(INSTALL_DIR) variable contains a command to prepare the install 
 # directory if it does not already exist.  Likewise $(INSTALL_BIN) contains the 
 # command to copy the binary file from its current location (in our case the build
 # directory) to the install directory.
-define Package/cpuminer/install
-	$(INSTALL_DIR) $(1)/bin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/cpuminer $(1)/usr/bin
+define Package/wrtminer/install
+	$(INSTALL_DIR) $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/wrtminer $(1)/usr/bin
+
+	$(INSTALL_DIR) $(1)/etc/init.d/
+	$(INSTALL_BIN) files/wrtminer.init $(1)/etc/init.d/wrtminer
+	$(INSTALL_DIR) $(1)/etc/config
+	$(INSTALL_CONF) files/wrtminer.config $(1)/etc/config/wrtminer
 endef
 
 
@@ -120,4 +111,4 @@ endef
 # The above define directives specify all the information needed, but this
 # line calls BuildPackage which in turn actually uses this information to
 # build a package.
-$(eval $(call BuildPackage,cpuminer))
+$(eval $(call BuildPackage,wrtminer))
