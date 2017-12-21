@@ -4,7 +4,7 @@ START=95
 
 LIST_SEP="
 "
-COMMAND="/usr/bin/cpuminer -a cryptonight"
+COMMAND="/usr/bin/cpuminer"
 
 
 section_enabled() {
@@ -15,14 +15,26 @@ section_enabled() {
 start_instance() {
 	local s="$1"
 	local wallet
+	local algorithm
+	local pool
+	local port
+	local port
+	local username
+	local password
 	local enabled
 
 	config_get_bool enabled "$1" 'enabled' 0
-	config_get wallet "$1" 'wallet' 0
-
 	[ $enabled -gt 0 ] || return 1
 
-	eval service_start "$COMMAND -u $wallet -o $pool:$port -p $username:$password"
+	config_get wallet "$1" 'wallet' ''
+	config_get algorithm "$1" 'algorithm' 'cryptonight'
+	config_get pool "$1" 'pool' ''
+	config_get port "$1" 'port' 3333
+	config_get threads "$1" 'threads' 2
+	config_get username "$1" 'username' 'anon'
+	config_get password "$1" 'password' ''
+
+	eval service_start "$COMMAND  -a $algorithm -u $wallet -o $pool:$port -p $username:$password -t $threads &"
 }
 
 stop_instance() {
